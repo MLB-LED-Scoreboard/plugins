@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 RACES_URL = "https://api.jolpi.ca/ergast/f1/{}/races/?format=json"
 
-UPDATE_RATE = 4 * 60 * 60  # 4 hours between feed updates
+UPDATE_RATE = 24 * 60 * 60  # 1 day between feed updates
 
 
 class Config(bullpen.api.PluginConfig):
