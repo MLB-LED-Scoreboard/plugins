@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lightninglane-led-plugin"
+version = "0.1.0"
+description = "MLB LED Scoreboard plugin for Walt Disney World attraction wait times"
+requires-python = ">=3.7"
+dependencies = ["requests"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.entry-points.'bullpen.mlbled.plugin']
+"lightninglane" = "lightninglane_plugin:load"
