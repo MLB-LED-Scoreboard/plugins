@@ -6,11 +6,12 @@ import json
 import time
 import datetime
 import requests
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from importlib.resources import files
 
 from PIL import Image
 
+import tzlocal
 import bullpen
 from bullpen.api.update import UpdateStatus
 from bullpen.logging import LOGGER
@@ -39,9 +40,10 @@ class Data(bullpen.api.PluginData):
     def __init__(self, config: Config) -> None:
         self.today = config.today
         self.year = self.today.year
+        self.time_fmt_str = config.time_fmt_str
 
         self.starttime = time.time()
-        self.next_race = None
+        self.next_race: Optional[dict[str, str]] = None
 
         self.update(True)
 
@@ -50,9 +52,27 @@ class Data(bullpen.api.PluginData):
             try:
                 races = requests.get(RACES_URL.format(self.year), timeout=10).json()["MRData"]["RaceTable"]["Races"]
                 for race in races:
-                    date = datetime.datetime.strptime(race["date"], "%Y-%m-%d").date()
-                    if date >= self.today:
-                        self.next_race = race
+                    date = datetime.datetime.strptime(race["date"], "%Y-%m-%d")
+                    time = race.get("time", "TBD")
+                    if time != "TBD":
+                        time = datetime.time.fromisoformat(time)
+                        date = datetime.datetime.combine(date, time)
+                        date = date.astimezone(tzlocal.get_localzone())
+                        time = date.strftime(self.time_fmt_str)
+
+                    if date.date() >= self.today:
+                        next_race = {}
+
+                        next_race["title"] = (
+                            f'{race["raceName"]} - {race["Circuit"]["Location"]["locality"]} {race["Circuit"]["Location"]["country"]}'
+                        )
+                        next_race["round"] = race["round"]
+
+                        next_race["time"] = time
+                        next_race["date"] = date.strftime(os_datetime_format("%b %-d"))
+                        next_race["circuitId"] = race["Circuit"]["circuitId"].lower()
+
+                        self.next_race = next_race
                         break
 
             except Exception as e:
@@ -120,11 +140,7 @@ class Renderer(bullpen.api.PluginRenderer[Data]):
 
         next_race = data.next_race
         assert next_race is not None
-        time = next_race.get("time", "TBD")
-        if time != "TBD":
-            time = datetime.time.fromisoformat(time).strftime(self.time_fmt_str)
-        date = datetime.datetime.strptime(next_race["date"], "%Y-%m-%d").strftime(os_datetime_format("%b %-d"))
-        top_text = f' {next_race["raceName"]} - {next_race["Circuit"]["Location"]["locality"]} {next_race["Circuit"]["Location"]["country"]}'
+
         len = scrolling_text(
             canvas,
             graphics,
@@ -134,12 +150,12 @@ class Renderer(bullpen.api.PluginRenderer[Data]):
             self.scroll_font,
             self.scroll_color,
             self.bg,
-            top_text,
+            next_race["title"],
             scrolling_text_pos,
             force_scroll=False,
         )
 
-        icon = self.tracks.get(next_race["Circuit"]["circuitId"].lower())
+        icon = self.tracks.get(next_race["circuitId"].lower())
         if icon:
             for x in range(icon.width):
                 for y in range(icon.height):
@@ -167,11 +183,16 @@ class Renderer(bullpen.api.PluginRenderer[Data]):
             self.date_coords["x"],
             self.date_coords["y"],
             self.date_color,
-            date,
+            next_race["date"],
         )
 
         graphics.DrawText(
-            canvas, self.time_font["font"], self.time_coords["x"], self.time_coords["y"], self.time_color, time
+            canvas,
+            self.time_font["font"],
+            self.time_coords["x"],
+            self.time_coords["y"],
+            self.time_color,
+            next_race["time"],
         )
 
         graphics.DrawText(
