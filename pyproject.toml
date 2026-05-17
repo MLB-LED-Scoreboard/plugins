@@ -7,7 +7,10 @@ name = "lightninglane-led-plugin"
 version = "0.1.0"
 description = "MLB LED Scoreboard plugin for Walt Disney World attraction wait times"
 requires-python = ">=3.7"
-dependencies = ["requests"]
+dependencies = [
+    "requests",
+    "lightninglane-live-led @ git+https://github.com/jc214809/LightningLane-Live-LED.git@develop",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
