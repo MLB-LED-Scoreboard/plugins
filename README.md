@@ -17,26 +17,35 @@ Parks and attractions with no live wait time data (closed, under refurbishment, 
 
 ## Installation
 
-Install the plugin into the same Python environment as your MLB LED Scoreboard:
+**Raspberry Pi** (from your mlb-led-scoreboard directory):
 
 ```bash
-pip install git+https://github.com/jc214809/lightninglane-led-plugin.git
+sudo venv/bin/pip install git+https://github.com/jc214809/lightninglane-led-plugin.git
 ```
 
-Or for local development, clone and install in editable mode:
+**Mac / local development** (editable install):
 
 ```bash
 git clone https://github.com/jc214809/lightninglane-led-plugin.git
-cd lightninglane-led-plugin
-pip install -e .
+cd /path/to/mlb-led-scoreboard
+venv/bin/pip install -e /path/to/lightninglane-led-plugin
 ```
 
 ## Configuration
 
-Add a `"plugins"` section to your MLB LED Scoreboard `config.json`:
+Add a screen entry to `rotation.screens` and a `"plugins"` section to your MLB LED Scoreboard `config.json`:
 
 ```json
 {
+  "rotation": {
+    "screens": [
+      {
+        "kind": "lightninglane",
+        "seconds": 60,
+        "with_priority": 2
+      }
+    ]
+  },
   "plugins": {
     "lightninglane": {
       "park_name": null,
