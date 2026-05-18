@@ -51,7 +51,7 @@ class Data(api.PluginData):
             return [p for p in self._parks_data if self.config.park_name.lower() in p["name"].lower()]
         return self._parks_data
 
-    def open_rides(self):
+    def displayable_rides(self):
         result = []
         for park in self.parks():
             for attraction in park.get("attractions", []):
@@ -63,7 +63,7 @@ class Data(api.PluginData):
     def operating_parks(self):
         seen = set()
         parks = []
-        for park, _ in self.open_rides():
+        for park, _ in self.displayable_rides():
             if park["id"] not in seen:
                 seen.add(park["id"])
                 parks.append(park)
