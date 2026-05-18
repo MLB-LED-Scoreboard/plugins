@@ -34,6 +34,16 @@ cd /path/to/mlb-led-scoreboard
 venv/bin/pip install -e /path/to/lightninglane-led-plugin
 ```
 
+## Updating
+
+To update to the latest version, re-run the install command with `--force-reinstall` (from your mlb-led-scoreboard directory):
+
+```bash
+sudo venv/bin/pip install --force-reinstall git+https://github.com/jc214809/lightninglane-led-plugin.git
+```
+
+> **Note:** PyPI publishing is planned for a future release. Once available, updating will simply be `sudo venv/bin/pip install --upgrade lightninglane-led-plugin`.
+
 ## Configuration
 
 Add a screen entry to `rotation.screens` and a `"plugins"` section to your MLB LED Scoreboard `config.json`:
