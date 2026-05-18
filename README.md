@@ -6,12 +6,15 @@ Powered by [LightningLane-Live-LED](https://github.com/jc214809/LightningLane-Li
 
 ## What it displays
 
-For each operating WDW theme park, the plugin cycles through:
+Each cycle through the plugin shows (8 seconds per frame):
 
-1. **Park info screen** — park name, operating hours, Lightning Lane Multi Pass price, and current weather
-2. **Each open attraction** — ride name and current standby wait time
+1. **Mickey Mouse silhouette** — intro screen
+2. **Trip countdown** *(if `trip_dates` is configured)* — "COUNTDOWN TO DISNEY X Days", or "Have a Magical Trip!" within 7 days after the trip
+3. **For each operating WDW park:**
+   - Park info screen — park name, hours, Lightning Lane Multi Pass price, and current weather
+   - Each displayable attraction — ride name and standby wait time
 
-Parks and attractions with no live wait time data (closed, under refurbishment, or not yet updated) are skipped automatically. The display updates in the background every `refresh_seconds` (default 5 minutes).
+Attractions that are CLOSED or under REFURBISHMENT are skipped. DOWN rides are shown with their downtime in red. The display updates in the background every `refresh_seconds` (default 5 minutes). When no parks have live data (e.g. overnight), the plugin yields its turn back to the scoreboard automatically.
 
 **Supported board sizes:** 64×32 and 64×64
 
@@ -49,7 +52,8 @@ Add a screen entry to `rotation.screens` and a `"plugins"` section to your MLB L
   "plugins": {
     "lightninglane": {
       "park_name": null,
-      "refresh_seconds": 300
+      "refresh_seconds": 300,
+      "trip_dates": ["2026-12-01"]
     }
   }
 }
@@ -59,13 +63,12 @@ Add a screen entry to `rotation.screens` and a `"plugins"` section to your MLB L
 |-----|------|---------|-------------|
 | `park_name` | string \| null | `null` | Filter to a single park by name (e.g. `"Magic Kingdom"`, `"EPCOT"`, `"Hollywood Studios"`, `"Animal Kingdom"`). `null` rotates through all four WDW theme parks. |
 | `refresh_seconds` | int | `300` | How often (in seconds) the background thread re-fetches live wait times. |
+| `trip_dates` | list | `[]` | List of upcoming trip dates in `YYYY-MM-DD` format. Drives the countdown screen. Multiple dates are supported; the nearest upcoming date is shown. |
 
 ## How it works
 
 The plugin registers itself via the `bullpen.mlbled.plugin` entry point. When bullpen loads it, three objects are created:
 
-- **`Config`** — reads `park_name` and `refresh_seconds` from `config.json`
+- **`Config`** — reads `park_name`, `refresh_seconds`, and `trip_dates` from `config.json`
 - **`Data`** — on first update, fetches the WDW park list then starts a daemon background thread that polls live attraction wait times on the configured interval
-- **`Renderer`** — cycles through each operating park: park info screen first, then one attraction per frame (8 seconds each)
-
-The plugin only renders when at least one park has live attraction data, so it yields control back to the scoreboard automatically on off-hours.
+- **`Renderer`** — runs a phase-based cycle: Mickey intro → trip countdown (if active) → parks; resumes where it left off if the scoreboard rotates away mid-cycle
