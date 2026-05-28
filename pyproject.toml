@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlb-led-scoreboard-extra-stats" 
+version = "0.1.0"
+description = "Extra stats plugin for the MLB-LED-Scoreboard"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "requests",
+]
+
+[project.entry-points."bullpen.mlbled.plugin"]
+last_five = "mlb_extra_stats:load_last_five"
+next_five = "mlb_extra_stats:load_next_five"
+war_leaders = "mlb_extra_stats:load_war_leaders"
+hr_leaders = "mlb_extra_stats:load_hr_leaders"
+ops_leaders = "mlb_extra_stats:load_ops_leaders"
+avg_leaders = "mlb_extra_stats:load_avg_leaders"
+rbi_leaders = "mlb_extra_stats:load_rbi_leaders"
+sb_leaders = "mlb_extra_stats:load_sb_leaders"
+era_leaders = "mlb_extra_stats:load_era_leaders"
+k_leaders = "mlb_extra_stats:load_k_leaders"
+
+[tool.setuptools]
+py-modules = ["mlb_extra_stats"]
