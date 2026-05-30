@@ -14,7 +14,7 @@ Each cycle through the plugin shows (8 seconds per frame):
    - Park info screen — park name, hours, Lightning Lane Multi Pass price, and current weather
    - Each displayable attraction — ride name and standby wait time
 
-Attractions that are CLOSED or under REFURBISHMENT are skipped. DOWN rides are shown with their downtime in red. The display updates in the background every `refresh_seconds` (default 5 minutes). When no parks have live data (e.g. overnight), the plugin yields its turn back to the scoreboard automatically.
+Attractions that are CLOSED or under REFURBISHMENT are skipped. DOWN rides are shown with their downtime in red. The display updates in the background every `refresh_seconds` (default 5 minutes). When no configured parks are operating (e.g. overnight), `is_active` is set to `False` and the scoreboard drops back to its normal game rotation automatically.
 
 **Supported board sizes:** 64×32 and 64×64
 
@@ -54,8 +54,7 @@ Add a screen entry to `rotation.screens` and a `"plugins"` section to your MLB L
     "screens": [
       {
         "kind": "lightninglane",
-        "seconds": 60,
-        "with_priority": 2
+        "priority": 1
       }
     ]
   },
@@ -68,6 +67,8 @@ Add a screen entry to `rotation.screens` and a `"plugins"` section to your MLB L
   }
 }
 ```
+
+The `priority` field tells the scoreboard to raise its priority level to `1` whenever any configured park is open (`is_active = True`). When all parks close, `is_active` goes `False` and the scoreboard drops back to its normal game rotation.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|

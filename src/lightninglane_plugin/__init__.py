@@ -56,6 +56,7 @@ class Data(api.PluginData):
 
     def update(self, force: bool = False) -> api.UpdateStatus:  # noqa: ARG002
         if self._thread is not None:
+            self.is_active = any(p.get("operating") for p in self.parks())
             return api.UpdateStatus.SUCCESS if self._parks_data else api.UpdateStatus.DEFERRED
         try:
             park_list = fetch_list_of_disney_world_parks()
