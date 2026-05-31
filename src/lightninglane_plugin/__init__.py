@@ -5,7 +5,7 @@ import threading
 import bullpen.api as api
 from bullpen.logging import LOGGER
 
-from api.disney_api import fetch_list_of_disney_world_parks
+from api.disney_api import resolve_parks_from_config
 from updater.data_updater import live_data_updater
 from display.startup import render_mickey_logo
 from display.countdown.countdown import render_countdown_to_disney
@@ -38,8 +38,15 @@ def _active_trip_date(trip_dates: list[date]) -> datetime | None:
 class Config(api.PluginConfig):
     def __init__(self, base: api.MLBConfig) -> None:
         cfg = base.plugin_config
-        self.park_name = cfg.get("park_name", None)  # None = all WDW parks
         self.refresh_seconds = cfg.get("refresh_seconds", 300)
+        # Support both "park_names" (list) and legacy "park_name" (string)
+        if "park_names" in cfg:
+            raw = cfg["park_names"]
+            self.park_names: list[str] = [raw] if isinstance(raw, str) else list(raw)
+        elif "park_name" in cfg:
+            self.park_names = [cfg["park_name"]]
+        else:
+            self.park_names = []  # empty = all WDW parks
         self.trip_dates: list[date] = []
         for s in cfg.get("trip_dates", []):
             try:
@@ -59,7 +66,7 @@ class Data(api.PluginData):
             self.is_active = any(p.get("operating") for p in self.parks())
             return api.UpdateStatus.SUCCESS if self._parks_data else api.UpdateStatus.DEFERRED
         try:
-            park_list = fetch_list_of_disney_world_parks()
+            park_list = resolve_parks_from_config(self.config.park_names)
             if not park_list:
                 LOGGER.error("LightningLane: no parks returned from API")
                 return api.UpdateStatus.FAILURE
@@ -75,8 +82,6 @@ class Data(api.PluginData):
         return api.UpdateStatus.DEFERRED
 
     def parks(self):
-        if self.config.park_name:
-            return [p for p in self._parks_data if self.config.park_name.lower() in p["name"].lower()]
         return self._parks_data
 
     def displayable_rides(self):

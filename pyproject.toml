@@ -9,7 +9,7 @@ description = "MLB LED Scoreboard plugin for Walt Disney World attraction wait t
 requires-python = ">=3.7"
 dependencies = [
     "requests",
-    "lightninglane-live-led @ git+https://github.com/jc214809/LightningLane-Live-LED.git@develop",
+    "lightninglane-live-led @ git+https://github.com/jc214809/LightningLane-Live-LED.git@feature/Expanded-Parks",
 ]
 
 [tool.setuptools.packages.find]
