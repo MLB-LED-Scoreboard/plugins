@@ -39,14 +39,8 @@ class Config(api.PluginConfig):
     def __init__(self, base: api.MLBConfig) -> None:
         cfg = base.plugin_config
         self.refresh_seconds = cfg.get("refresh_seconds", 300)
-        # Support both "park_names" (list) and legacy "park_name" (string)
-        if "park_names" in cfg:
-            raw = cfg["park_names"]
-            self.park_names: list[str] = [raw] if isinstance(raw, str) else list(raw)
-        elif "park_name" in cfg:
-            self.park_names = [cfg["park_name"]]
-        else:
-            self.park_names = []  # empty = all WDW parks
+        raw = cfg.get("parks", [])
+        self.park_names: list[str] = [raw] if isinstance(raw, str) else list(raw)
         self.trip_dates: list[date] = []
         for s in cfg.get("trip_dates", []):
             try:
@@ -63,8 +57,10 @@ class Data(api.PluginData):
 
     def update(self, force: bool = False) -> api.UpdateStatus:  # noqa: ARG002
         if self._thread is not None:
-            self.is_active = any(p.get("operating") for p in self.parks())
-            return api.UpdateStatus.SUCCESS if self._parks_data else api.UpdateStatus.DEFERRED
+            if self._parks_data:
+                self.is_active = any(p.get("operating") for p in self.parks())
+                return api.UpdateStatus.SUCCESS
+            return api.UpdateStatus.DEFERRED
         try:
             park_list = resolve_parks_from_config(self.config.park_names)
             if not park_list:
