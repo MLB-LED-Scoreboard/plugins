@@ -60,9 +60,11 @@ Add a screen entry to `rotation.screens` and a `"plugins"` section to your MLB L
   },
   "plugins": {
     "lightninglane": {
-      "park_name": null,
+      "parks": ["Magic Kingdom", "EPCOT", "Hollywood Studios", "Animal Kingdom"],
       "refresh_seconds": 300,
-      "trip_dates": ["2026-12-01"]
+      "trip_dates": [
+        "2026-06-17"
+      ]
     }
   }
 }
@@ -70,9 +72,11 @@ Add a screen entry to `rotation.screens` and a `"plugins"` section to your MLB L
 
 The `priority` field tells the scoreboard to raise its priority level to `1` whenever any configured park is open (`is_active = True`). When all parks close, `is_active` goes `False` and the scoreboard drops back to its normal game rotation.
 
+`parks` accepts any park name supported by the [ThemeParks Wiki API](https://api.themeparks.wiki) — Walt Disney World, Disneyland, Universal, Cedar Point, and more. Omit the key entirely to default to all four WDW theme parks.
+
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `park_name` | string \| null | `null` | Filter to a single park by name (e.g. `"Magic Kingdom"`, `"EPCOT"`, `"Hollywood Studios"`, `"Animal Kingdom"`). `null` rotates through all four WDW theme parks. |
+| `parks` | list of strings | all WDW parks | Parks to display. Accepts any destination supported by ThemeParks Wiki (e.g. `"Magic Kingdom"`, `"Cedar Point"`, `"Universal Studios Florida"`). |
 | `refresh_seconds` | int | `300` | How often (in seconds) the background thread re-fetches live wait times. |
 | `trip_dates` | list | `[]` | List of upcoming trip dates in `YYYY-MM-DD` format. Drives the countdown screen. Multiple dates are supported; the nearest upcoming date is shown. |
 
@@ -80,6 +84,6 @@ The `priority` field tells the scoreboard to raise its priority level to `1` whe
 
 The plugin registers itself via the `bullpen.mlbled.plugin` entry point. When bullpen loads it, three objects are created:
 
-- **`Config`** — reads `park_name`, `refresh_seconds`, and `trip_dates` from `config.json`
+- **`Config`** — reads `parks`, `refresh_seconds`, and `trip_dates` from `config.json`
 - **`Data`** — on first update, fetches the WDW park list then starts a daemon background thread that polls live attraction wait times on the configured interval
 - **`Renderer`** — runs a phase-based cycle: Mickey intro → trip countdown (if active) → parks; resumes where it left off if the scoreboard rotates away mid-cycle
