@@ -77,11 +77,8 @@ class Trains(PluginData):
 def _get_feed(route):
     try:
         feed = SubwayFeed.get(route)
-        try:
-            return False, feed.extract_stop_dict()
-        except:
-            LOGGER.exception("Serialization error while refreshing train data")
-    except:
+        return False, feed.extract_stop_dict()
+    except Exception:
         LOGGER.exception("Networking Error while refreshing train data")
         return True, {}
 
@@ -120,7 +117,7 @@ class Stop:
                     continue
                 minutes = (delta.seconds + 30) // 60
                 times.append(minutes)
-        except:
+        except Exception:
             pass
 
         n_times = len(times)
