@@ -1,0 +1,89 @@
+# LightningLane LED Plugin
+
+A [bullpen](https://github.com/MLB-LED-Scoreboard/mlb-led-scoreboard) plugin for the MLB LED Scoreboard that displays live Walt Disney World attraction wait times on an RGB LED matrix.
+
+Powered by [LightningLane-Live-LED](https://github.com/jc214809/LightningLane-Live-LED) and the [ThemeParks Wiki API](https://api.themeparks.wiki) (no API key required).
+
+## What it displays
+
+Each cycle through the plugin shows (8 seconds per frame):
+
+1. **Mickey Mouse silhouette** — intro screen
+2. **Trip countdown** *(if `trip_dates` is configured)* — "COUNTDOWN TO DISNEY X Days", or "Have a Magical Trip!" within 7 days after the trip
+3. **For each operating WDW park:**
+   - Park info screen — park name, hours, Lightning Lane Multi Pass price, and current weather
+   - Each displayable attraction — ride name and standby wait time
+
+Attractions that are CLOSED or under REFURBISHMENT are skipped. DOWN rides are shown with their downtime in red. The display updates in the background every `refresh_seconds` (default 5 minutes). When no configured parks are operating (e.g. overnight), `is_active` is set to `False` and the scoreboard drops back to its normal game rotation automatically.
+
+**Supported board sizes:** 64×32 and 64×64
+
+## Installation
+
+**Raspberry Pi** (from your mlb-led-scoreboard directory):
+
+```bash
+sudo venv/bin/pip install git+https://github.com/jc214809/lightninglane-led-plugin.git
+```
+
+**Mac / local development** (editable install):
+
+```bash
+git clone https://github.com/jc214809/lightninglane-led-plugin.git
+cd /path/to/mlb-led-scoreboard
+venv/bin/pip install -e /path/to/lightninglane-led-plugin
+```
+
+## Updating
+
+To update to the latest version, re-run the install command with `--force-reinstall` (from your mlb-led-scoreboard directory):
+
+```bash
+sudo venv/bin/pip install --force-reinstall git+https://github.com/jc214809/lightninglane-led-plugin.git
+```
+
+> **Note:** PyPI publishing is planned for a future release. Once available, updating will simply be `sudo venv/bin/pip install --upgrade lightninglane-led-plugin`.
+
+## Configuration
+
+Add a screen entry to `rotation.screens` and a `"plugins"` section to your MLB LED Scoreboard `config.json`:
+
+```json
+{
+  "rotation": {
+    "screens": [
+      {
+        "kind": "lightninglane",
+        "priority": 1
+      }
+    ]
+  },
+  "plugins": {
+    "lightninglane": {
+      "parks": ["Magic Kingdom", "EPCOT", "Hollywood Studios", "Animal Kingdom"],
+      "refresh_seconds": 300,
+      "trip_dates": [
+        "2026-06-17"
+      ]
+    }
+  }
+}
+```
+
+The `priority` field tells the scoreboard to raise its priority level to `1` whenever any configured park is open (`is_active = True`). When all parks close, `is_active` goes `False` and the scoreboard drops back to its normal game rotation.
+
+`parks` accepts any park name supported by the [ThemeParks Wiki API](https://api.themeparks.wiki) — Walt Disney World, Disneyland, Universal, Cedar Point, and more. Omit the key entirely to default to all four WDW theme parks.
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `parks` | list of strings | all WDW parks | Parks to display. Accepts any destination supported by ThemeParks Wiki (e.g. `"Magic Kingdom"`, `"Cedar Point"`, `"Universal Studios Florida"`). |
+| `refresh_seconds` | int | `300` | How often (in seconds) the background thread re-fetches live wait times. |
+| `trip_dates` | list | `[]` | List of upcoming trip dates in `YYYY-MM-DD` format. Drives the countdown screen. Multiple dates are supported; the nearest upcoming date is shown. |
+
+## How it works
+
+The plugin registers itself via the `bullpen.mlbled.plugin` entry point. When bullpen loads it, three objects are created:
+
+- **`Config`** — reads `parks`, `refresh_seconds`, and `trip_dates` from `config.json`
+- **`Data`** — on first update, fetches the WDW park list then starts a daemon background thread that polls live attraction wait times on the configured interval
+- **`Renderer`** — runs a phase-based cycle: Mickey intro → trip countdown (if active) → parks; resumes where it left off if the scoreboard rotates away mid-cycle
