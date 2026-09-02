@@ -4,18 +4,17 @@ Show the upcoming race.
 
 <img width="1536" height="768" alt="image" src="https://github.com/user-attachments/assets/876ff4cd-a275-4e86-a4b6-e2173787a620" />
 
-
-A plugin for [mlb-led-scoreboard](https://github.com/WardBrian/mlb-led-scoreboard).
-
 Based on the [tronbyt plugin](https://github.com/tronbyt/apps/tree/main/apps/formula1)
 
+Author: [Brian Ward](https://github.com/WardBrian)
 
 ## Example config
 
 `colors/scoreboard.json`:
+
 ```json
 {
-  "plugins" : {
+  "plugins": {
     "f1": {
       "scrolling_text": {
         "r": 255,
