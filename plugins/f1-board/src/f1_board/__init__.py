@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 RACES_URL = "https://api.jolpi.ca/ergast/f1/{}/races/?format=json"
 
-UPDATE_RATE = 24 * 60 * 60  # 1 day between feed updates
+UPDATE_RATE = 4 * 60 * 60  # 4 hours between feed updates
 
 
 class Config(bullpen.api.PluginConfig):
@@ -53,12 +53,12 @@ class Data(bullpen.api.PluginData):
                 races = requests.get(RACES_URL.format(self.year), timeout=10).json()["MRData"]["RaceTable"]["Races"]
                 for race in races:
                     date = datetime.datetime.strptime(race["date"], "%Y-%m-%d")
-                    time = race.get("time", "TBD")
-                    if time != "TBD":
-                        time = datetime.time.fromisoformat(time)
-                        date = datetime.datetime.combine(date, time)
+                    race_time = race.get("time", "TBD")
+                    if race_time != "TBD":
+                        race_time = datetime.time.fromisoformat(race_time)
+                        date = datetime.datetime.combine(date, race_time)
                         date = date.astimezone(tzlocal.get_localzone())
-                        time = date.strftime(self.time_fmt_str)
+                        race_time = date.strftime(self.time_fmt_str)
 
                     if date.date() >= self.today:
                         next_race = {}
@@ -68,7 +68,7 @@ class Data(bullpen.api.PluginData):
                         )
                         next_race["round"] = race["round"]
 
-                        next_race["time"] = time
+                        next_race["time"] = race_time
                         next_race["date"] = date.strftime(os_datetime_format("%b %-d"))
                         next_race["circuitId"] = race["Circuit"]["circuitId"].lower()
 
@@ -78,6 +78,9 @@ class Data(bullpen.api.PluginData):
             except Exception as e:
                 LOGGER.exception("Failed to fetch F1 data: %s", e)
                 return UpdateStatus.FAIL
+            finally:
+                self.starttime = time.time()
+
             return UpdateStatus.SUCCESS
         return UpdateStatus.DEFERRED
 
@@ -88,8 +91,13 @@ class Data(bullpen.api.PluginData):
 
 
 def decode_image(image_str):
-    return Image.open(io.BytesIO(base64.b64decode(image_str)))
-
+    try:
+        img = Image.open(io.BytesIO(base64.b64decode(image_str)))
+        img.load()
+        return img
+    except Exception as e:
+        LOGGER.exception("Failed to decode image: %s", e)
+        return None
 
 class Renderer(bullpen.api.PluginRenderer[Data]):
     TRACK_IMG_BASE_HEIGHT = 23

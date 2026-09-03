@@ -2,12 +2,9 @@
 
 Show the upcoming trains.
 
-A plugin for [mlb-led-scoreboard](https://github.com/WardBrian/mlb-led-scoreboard).
-
 ![Preview image](https://github.com/user-attachments/assets/db1dd47d-6e68-4c46-a025-2780be613dbc)
 
-**Note**: This is just a personal project to use on my board during the baseball offseason, I probably
-won't add any more features!
+Author: [Brian Ward](https://github.com/WardBrian)
 
 ## Example config
 
@@ -16,9 +13,7 @@ won't add any more features!
 ```json
 {
   "rotation": {
-    "screens": [
-      { "kind": "trains", "seconds": 20, "with_priority": 0 }
-    ]
+    "screens": [{ "kind": "trains", "seconds": 20, "with_priority": 0 }]
   },
   "plugins": {
     "example": {
@@ -35,11 +30,14 @@ won't add any more features!
 }
 ```
 
+To find train/stop IDs, consider using [`underground findstops`](https://github.com/nolanbconaway/underground#findstops)
+
 `colors/scoreboard.json`:
+
 ```json
 {
-  "plugins" : {
-    "trains":{
+  "plugins": {
+    "trains": {
       "stop": {
         "r": 255,
         "g": 255,

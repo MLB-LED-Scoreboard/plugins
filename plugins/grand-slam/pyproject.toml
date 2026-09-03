@@ -4,12 +4,17 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "mlb-led-scoreboard-example-plugin"
+name = "grand-slam"
 version = "0.1.0"
+dependencies = ["Pillow>=10.0.1,<12.0.0", "tzlocal"]
 license = "GPL-3.0-or-later"
+authors = [{ name = "Brian Ward", email = "brianmward99@gmail.com" }]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [project.entry-points.'bullpen.mlbled.plugin']
-"example" = "mlb_led_scoreboard_example_plugin:load"
+"grand_slam" = "grand_slam:load"
+
+[tool.black]
+line-length = 120
