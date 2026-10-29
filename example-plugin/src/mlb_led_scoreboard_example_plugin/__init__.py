@@ -36,7 +36,7 @@ class Renderer(api.PluginRenderer):
         canvas.Fill(*self.bg)
         graphics.DrawText(
             canvas,
-            self.font["font"],
+            self.font,
             0,
             10,
             graphics.Color(255, 255, 255),
