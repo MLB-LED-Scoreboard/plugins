@@ -330,7 +330,7 @@ class Renderer(bullpen.api.PluginRenderer[Data]):
 
         coords = self.p2_coords if player == "away" else self.p1_coords
 
-        font_width = self.player_font["size"]["width"]
+        font_width = self.player_font.width
 
         num_sets = max(len(match.away_sets), len(match.home_sets))
         score_length = num_sets * font_width + ((num_sets - 1) * int(font_width // 2) if num_sets > 1 else 0)
@@ -367,7 +367,7 @@ class Renderer(bullpen.api.PluginRenderer[Data]):
 
             graphics.DrawText(
                 canvas,
-                self.player_font["font"],
+                self.player_font,
                 coords["x"] + name_width + i * int(font_width * 1.5),
                 coords["y"],
                 color,

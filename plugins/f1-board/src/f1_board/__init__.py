@@ -99,6 +99,7 @@ def decode_image(image_str):
         LOGGER.exception("Failed to decode image: %s", e)
         return None
 
+
 class Renderer(bullpen.api.PluginRenderer[Data]):
     TRACK_IMG_BASE_HEIGHT = 23
     TRACK_IMG_BASE_WIDTH = 28
@@ -187,7 +188,7 @@ class Renderer(bullpen.api.PluginRenderer[Data]):
 
         graphics.DrawText(
             canvas,
-            self.date_font["font"],
+            self.date_font,
             self.date_coords["x"],
             self.date_coords["y"],
             self.date_color,
@@ -196,7 +197,7 @@ class Renderer(bullpen.api.PluginRenderer[Data]):
 
         graphics.DrawText(
             canvas,
-            self.time_font["font"],
+            self.time_font,
             self.time_coords["x"],
             self.time_coords["y"],
             self.time_color,
@@ -205,7 +206,7 @@ class Renderer(bullpen.api.PluginRenderer[Data]):
 
         graphics.DrawText(
             canvas,
-            self.race_font["font"],
+            self.race_font,
             self.race_coords["x"],
             self.race_coords["y"],
             self.race_color,

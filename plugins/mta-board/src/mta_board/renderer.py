@@ -8,7 +8,6 @@ from .config import Config
 from .trains import Stop, Trains
 from . import routes
 
-
 if TYPE_CHECKING:
     from RGBMatrixEmulator.emulation.canvas import Canvas
 
@@ -72,7 +71,7 @@ class Renderer(PluginRenderer):
 
         graphics.DrawText(
             canvas,
-            self.eta_font["font"],
+            self.eta_font,
             self.eta_coords["x"],
             self.eta_coords["y"] + offset,
             self.eta_color,
@@ -110,13 +109,11 @@ def render_line(canvas, graphics, font, x, y, d, name):
     if routes.ROUTE_TYPE[name] == "train":
         DrawFilledCircle(canvas, x, y, d, line_color)
     else:
-        DrawFilledRectangle(
-            canvas, x - font["size"]["width"], y - d // 2 + 1, font["size"]["width"] * 2 + 1, d - 1, line_color
-        )
+        DrawFilledRectangle(canvas, x - font.width, y - d // 2 + 1, font.width * 2 + 1, d - 1, line_color)
     display_name = routes.ROUTE_NAME[name]
-    text_x = center_text_position(display_name, x + 1, font["size"]["width"])
+    text_x = center_text_position(display_name, x + 1, font.width)
     color = graphics.Color(255, 255, 255)
-    graphics.DrawText(canvas, font["font"], text_x, y + font["size"]["height"] // 2 - 1, color, display_name)
+    graphics.DrawText(canvas, font, text_x, y + font.height // 2 - 1, color, display_name)
 
 
 def DrawFilledCircle(canvas: "Canvas", x, y, d, color):
